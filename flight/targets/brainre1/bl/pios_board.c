@@ -52,12 +52,11 @@ void PIOS_Board_Init() {
 #if defined(PIOS_INCLUDE_LED)
 	PIOS_LED_Init(&pios_led_cfg);
 #endif	/* PIOS_INCLUDE_LED */
-	PIOS_LED_On(PIOS_LED_HEARTBEAT);
 
 	PWR_BackupAccessCmd(ENABLE);
 	RCC_LSEConfig(RCC_LSE_OFF);
 
-	PIOS_LED_On(PIOS_LED_HEARTBEAT);
+	PIOS_LED_On(PIOS_LED_ALARM);
 
 #if defined(PIOS_INCLUDE_SPI)
 	/* Set up the SPI interface to the flash */
