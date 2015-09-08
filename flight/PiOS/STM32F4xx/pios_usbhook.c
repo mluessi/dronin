@@ -322,7 +322,7 @@ static USBD_Usr_cb_TypeDef user_callbacks = {
 	.DeviceConfigured   = PIOS_USBHOOK_USR_DeviceConfigured,
 	.DeviceSuspended    = PIOS_USBHOOK_USR_DeviceSuspended,
 	.DeviceResumed      = PIOS_USBHOOK_USR_DeviceResumed,
-	.DeviceConnected    = PIOS_USBHOOK_USR_DeviceConnected,
+	.DeviceConnected    =  ,
 	.DeviceDisconnected = PIOS_USBHOOK_USR_DeviceDisconnected,
 };
 

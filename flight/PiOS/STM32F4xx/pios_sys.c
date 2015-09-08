@@ -172,8 +172,8 @@ void PIOS_SYS_Init(void)
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 	GPIO_Init(GPIOF, &GPIO_InitStructure);
 	GPIO_Init(GPIOG, &GPIO_InitStructure);
-	GPIO_Init(GPIOH, &GPIO_InitStructure);
-	GPIO_Init(GPIOI, &GPIO_InitStructure);
+//	GPIO_Init(GPIOH, &GPIO_InitStructure);
+//	GPIO_Init(GPIOI, &GPIO_InitStructure);
 }
 
 /**
