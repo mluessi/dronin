@@ -177,47 +177,16 @@
 /******************************************************************************/
 
 /************************* PLL Parameters *************************************/
-#if defined(STM32F40_41xxx) || defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F401xx)
-/* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
-#define PLL_M      25
-#elif defined (STM32F446xx)
 #define PLL_M      8
-#elif defined (STM32F411xE)
-
-#if defined(USE_HSE_BYPASS)
-#define PLL_M      8    
-#else  
-#define PLL_M      16
-#endif /* USE_HSE_BYPASS */
-
-#endif /* STM32F40_41xxx || STM32F427_437xx || STM32F429_439xx || STM32F401xx */  
-
-/* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
-#define PLL_Q      7
-
-#if defined(STM32F446xx)
-/* PLL division factor for I2S, SAI, SYSTEM and SPDIF: Clock =  PLL_VCO / PLLR */
-#define PLL_R      7
-#endif /* STM32F446xx */ 
-
-#if defined(STM32F40_41xxx) || defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F446xx)
 #define PLL_N      180
-/* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_P      2
-#endif /* STM32F40_41xxx || STM32F427_437x || STM32F429_439xx || STM32F446xx */
+#define PLL_Q      2
+#define PLL_R      2
 
-#if defined(STM32F401xx)
-#define PLL_N      336
-/* SYSCLK = PLL_VCO / PLL_P */
-#define PLL_P      4
-#endif /* STM32F401xx */
-
-#if defined(STM32F411xE)
-#define PLL_N      400
-/* SYSCLK = PLL_VCO / PLL_P */
-#define PLL_P      4   
-#endif /* STM32F411xx */
-
+#define PLLSAI_M      8
+#define PLLSAI_N      192
+#define PLLSAI_P      8
+#define PLLSAI_Q      2
 /******************************************************************************/
 
 /**
@@ -673,11 +642,13 @@ static void SetSysClock(void)
 
 #if defined(STM32F446xx)
   /* Configure 48MHz clock for USB */
-  RCC_PLLSAIConfig(8, 192, 8, 2);
+  RCC_PLLSAICmd(DISABLE);
+  RCC_PLLSAIConfig(PLLSAI_M, PLLSAI_N, PLLSAI_P, PLLSAI_Q);
   RCC_48MHzClockSourceConfig(RCC_48MHZCLKSource_PLLSAI);
   while (!(RCC->DCKCFGR & RCC_DCKCFGR_CK48MSEL))
   {
-  }
+}
+  RCC_PLLSAICmd(ENABLE);
 #endif /* STM32F446xx */
 
 }
