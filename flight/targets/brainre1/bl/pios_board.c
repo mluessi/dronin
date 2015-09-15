@@ -56,8 +56,6 @@ void PIOS_Board_Init() {
 	PWR_BackupAccessCmd(ENABLE);
 	RCC_LSEConfig(RCC_LSE_OFF);
 
-	PIOS_LED_On(PIOS_LED_ALARM);
-
 #if defined(PIOS_INCLUDE_SPI)
 	/* Set up the SPI interface to the flash */
 	if (PIOS_SPI_Init(&pios_spi_flash_id, &pios_spi_flash_cfg)) {

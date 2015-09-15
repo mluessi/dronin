@@ -7,6 +7,7 @@ MCU                 := cortex-m4
 CHIP                := STM32F446RET
 BOARD               := STM32F4xx_BRAINFPVRE1
 CDEFS               += -DSTM32F446xx
+#CDEFS               += -DSTM32F40_41xxx
 MODEL               := HD
 MODEL_SUFFIX        := 
 
