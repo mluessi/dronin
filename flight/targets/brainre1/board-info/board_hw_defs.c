@@ -105,7 +105,7 @@ const struct streamfs_cfg streamfs_settings = {
 
 static const struct pios_flash_jedec_cfg flash_s25fl_cfg = {
 	.expect_manufacturer = JEDEC_MANUFACTURER_SPANISON,
-	.expect_memorytype   = 0x20,
+	.expect_memorytype   = 0x40,
 	.expect_capacity     = 0x17,
 	.sector_erase        = 0x20,
 };
@@ -364,9 +364,13 @@ void PIOS_SPI_flash_irq_handler(void)
 
 #endif	/* PIOS_INCLUDE_SPI */
 
+#if defined(PIOS_INCLUDE_I2C)
+#include <pios_i2c_priv.h>
+#endif /* PIOS_INCLUDE_I2C */
 
-
-
+#if defined(PIOS_INCLUDE_COM)
+#include "pios_com_priv.h"
+#endif	/* PIOS_INCLUDE_COM */
 
 #if defined(PIOS_INCLUDE_GCSRCVR)
 #include "pios_gcsrcvr_priv.h"
@@ -485,7 +489,36 @@ void PIOS_ADC_DMA_irq_handler(void)
 #endif /* PIOS_INCLUDE_ADC */
 
 
+#if defined(PIOS_INCLUDE_RTC)
+/*
+ * Realtime Clock (RTC)
+ */
+#include <pios_rtc_priv.h>
 
+void PIOS_RTC_IRQ_Handler (void);
+void RTC_WKUP_IRQHandler() __attribute__ ((alias ("PIOS_RTC_IRQ_Handler")));
+static const struct pios_rtc_cfg pios_rtc_main_cfg = {
+	// FIXME for real board the clock is 16MHz
+	.clksrc = RCC_RTCCLKSource_HSE_Div16, // Divide 8 Mhz crystal down to 1
+	// For some reason it's acting like crystal is 16 Mhz.  This clock is then divided
+	// by another 16 to give a nominal 62.5 khz clock
+	.prescaler = 100, // Every 100 cycles gives 625 Hz
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel                   = RTC_WKUP_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_MID,
+			.NVIC_IRQChannelSubPriority        = 0,
+			.NVIC_IRQChannelCmd                = ENABLE,
+		},
+	},
+};
+
+void PIOS_RTC_IRQ_Handler (void)
+{
+	PIOS_RTC_irq_handler ();
+}
+
+#endif
 /**
  * @}
  * @}

@@ -56,7 +56,7 @@ OPTMODULES += VibrationAnalysis
 OPTMODULES += UAVOMavlinkBridge
 OPTMODULES += Battery
 OPTMODULES += ComUsbBridge
-OPTMODULES += Airspeed
+#OPTMODULES += Airspeed
 OPTMODULES += UAVOHoTTBridge
 OPTMODULES += UAVOFrSKYSensorHubBridge
 OPTMODULES += UAVOFrSKYSPortBridge
@@ -64,7 +64,7 @@ OPTMODULES += UAVOLighttelemetryBridge
 OPTMODULES += PicoC
 OPTMODULES += Geofence
 OPTMODULES += Logging
-OPTMODULES += OnScreenDisplay
+#OPTMODULES += OnScreenDisplay
 
 # Paths
 OPUAVTALKINC = $(OPUAVTALK)/inc
@@ -157,7 +157,6 @@ include $(PIOS)/STM32F4xx/library_chibios.mk
 ## PIOS Hardware (Common)
 SRC += $(PIOSCOMMON)/pios_delay.c
 SRC += $(PIOSCOMMON)/pios_gcsrcvr.c
-SRC += $(PIOSCOMMON)/pios_mpu9250.c
 SRC += $(PIOSCOMMON)/pios_hmc5883.c
 SRC += $(PIOSCOMMON)/pios_hmc5983_i2c.c
 SRC += $(PIOSCOMMON)/pios_ms5611.c
@@ -264,7 +263,7 @@ CDEFS += -DUNALIGNED_SUPPORT_DISABLE
 
 # This is not the best place for these.  Really should abstract out
 # to the board file or something
-CDEFS += -DSTM32F40_41xxx
+CDEFS += -DSTM32F446xx
 
 # Debugging format.
 DEBUGF = dwarf-2
@@ -354,6 +353,7 @@ LDFLAGS += -Wl,--warn-common
 LDFLAGS += -Wl,--fatal-warnings
 
 #Linker scripts
+LINKER_SCRIPTS_APP = sections_chibios.ld
 LDFLAGS += -T memory.ld $(addprefix -T,$(LINKER_SCRIPTS_APP))
 
 include ./UAVObjects.inc

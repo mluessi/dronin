@@ -27,7 +27,7 @@
  * Board identifier.
  */
 #define BOARD_BRAINFPV_BRAIN
-#define BOARD_NAME                  "www.brainfpv.com brain"
+#define BOARD_NAME                  "www.brainfpv.com RE1"
 
 
 /*
@@ -51,8 +51,8 @@
 /*
  * MCU type as defined in the ST header.
  */
-#if !defined(STM32F40_41xxx)
-#define STM32F40_41xxx
+#if !defined(DSTM32F446xx)
+#define DSTM32F446xx
 #endif
 
 #if !defined(_FROM_ASM_)
