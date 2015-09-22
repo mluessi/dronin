@@ -103,8 +103,8 @@ const struct streamfs_cfg streamfs_settings = {
 #if defined(PIOS_INCLUDE_FLASH_JEDEC)
 #include "pios_flash_jedec_priv.h"
 
-static const struct pios_flash_jedec_cfg flash_mx25_cfg = {
-	.expect_manufacturer = JEDEC_MANUFACTURER_MACRONIX,
+static const struct pios_flash_jedec_cfg flash_s25fl_cfg = {
+	.expect_manufacturer = JEDEC_MANUFACTURER_SPANISON,
 	.expect_memorytype   = 0x20,
 	.expect_capacity     = 0x17,
 	.sector_erase        = 0x20,

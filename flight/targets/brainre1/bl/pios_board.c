@@ -68,7 +68,7 @@ void PIOS_Board_Init() {
 	PIOS_Flash_Internal_Init(&pios_internal_flash_id, &flash_internal_cfg);
 
 #if defined(PIOS_INCLUDE_FLASH_JEDEC)
-	PIOS_Flash_Jedec_Init(&pios_external_flash_id, pios_spi_flash_id, 0, &flash_mx25_cfg);
+	PIOS_Flash_Jedec_Init(&pios_external_flash_id, pios_spi_flash_id, 0, &flash_s25fl_cfg);
 #endif	/* PIOS_INCLUDE_FLASH_JEDEC */
 
 	/* Register the partition table */
