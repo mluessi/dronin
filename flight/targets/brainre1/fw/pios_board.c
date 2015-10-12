@@ -50,6 +50,16 @@ extern const uint32_t _bu_payload_start;
 extern const uint32_t _bu_payload_end;
 extern const uint32_t _bu_payload_size;
 
+
+#if defined(PIOS_INCLUDE_BMP280)
+#include "pios_bmp280_priv.h"
+
+static const struct pios_bmp280_cfg pios_bmp280_cfg = {
+	.oversampling = BMP280_HIGH_RESOLUTION,
+	.temperature_interleaving = 1
+};
+#endif /* PIOS_INCLUDE_BMP280 */
+
 #if defined(PIOS_INCLUDE_HMC5883)
 #include "pios_hmc5883_priv.h"
 
@@ -73,17 +83,6 @@ static const struct pios_hmc5983_cfg pios_hmc5983_external_cfg = {
 	.Orientation = PIOS_HMC5983_TOP_0DEG,
 };
 #endif /* PIOS_INCLUDE_HMC5983 */
-
-/**
- * Configuration for the MS5611 chip
- */
-#if defined(PIOS_INCLUDE_MS5611)
-#include "pios_ms5611_priv.h"
-static const struct pios_ms5611_cfg pios_ms5611_cfg = {
-	.oversampling = MS5611_OSR_4096,
-	.temperature_interleaving = 1,
-};
-#endif /* PIOS_INCLUDE_MS5611 */
 
 #if defined(PIOS_INCLUDE_FRSKY_RSSI)
 #include "pios_frsky_rssi_priv.h"
@@ -222,7 +221,7 @@ void OSD_configure_bw_levels(void)
  * 1 pulse - flash chip
  * 2 pulses - MPU6050
  * 3 pulses - HMC5883
- * 4 pulses - MS5611
+ * 4 pulses - BMP280
  * 5 pulses - gyro I2C bus locked
  * 6 pulses - mag/baro I2C bus locked
  */
@@ -265,11 +264,11 @@ void PIOS_Board_Init(void) {
 #endif	/* PIOS_INCLUDE_LED */
 
 #if defined(PIOS_INCLUDE_I2C)
-	//if (PIOS_I2C_Init(&pios_i2c_internal_id, &pios_i2c_internal_cfg)) {
-	//	PIOS_DEBUG_Assert(0);
-	//}
-	//if (PIOS_I2C_CheckClear(pios_i2c_internal_id) != 0)
-	//	panic(3);
+	if (PIOS_I2C_Init(&pios_i2c_internal_id, &pios_i2c_internal_cfg)) {
+		PIOS_DEBUG_Assert(0);
+	}
+	if (PIOS_I2C_CheckClear(pios_i2c_internal_id) != 0)
+		panic(3);
 #endif
 
 #if defined(PIOS_INCLUDE_SPI)
@@ -521,6 +520,13 @@ void PIOS_Board_Init(void) {
 	}
 #endif	/* PIOS_INCLUDE_USB */
 
+#if defined(PIOS_INCLUDE_I2C)
+#if defined(PIOS_INCLUDE_BMP280)
+	if (PIOS_BMP280_Init(&pios_bmp280_cfg, pios_i2c_internal_id) != 0){
+		panic(4);
+	}
+#endif /* PIOS_INCLUDE_BMP280 */
+#endif /* I2C */
 }
 
 /**
