@@ -124,7 +124,6 @@ extern uintptr_t pios_com_hott_id;
 extern uintptr_t pios_com_picoc_id;
 extern uintptr_t pios_com_logging_id;
 
-
 #define PIOS_COM_GPS                    (pios_com_gps_id)
 #define PIOS_COM_TELEM_USB              (pios_com_telem_usb_id)
 #define PIOS_COM_TELEM_RF               (pios_com_telem_rf_id)
@@ -143,6 +142,21 @@ extern uintptr_t pios_com_debug_id;
 #define PIOS_COM_DEBUG                  (pios_com_debug_id)
 #endif	/* PIOS_INCLUDE_DEBUG_CONSOLE */
 
+#if defined(PIOS_INCLUDE_RFM22B)
+extern uint32_t pios_rfm22b_id;
+extern uint32_t pios_spi_telem_flash_id;
+#define PIOS_RFM22_SPI_PORT             (pios_spi_telem_flash_id)
+#endif /* PIOS_INCLUDE_RFM22B */
+
+//-------------------------
+// Packet Handler
+//-------------------------
+#define RS_ECC_NPARITY 4
+#define PIOS_PH_MAX_PACKET 255
+#define PIOS_PH_WIN_SIZE 3
+#define PIOS_PH_MAX_CONNECTIONS 1
+extern uint32_t pios_packet_handler;
+#define PIOS_PACKET_HANDLER (pios_packet_handler)
 
 //------------------------
 // TELEMETRY

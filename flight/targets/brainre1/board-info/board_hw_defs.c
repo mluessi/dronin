@@ -713,7 +713,191 @@ void PIOS_RTC_IRQ_Handler (void)
 	PIOS_RTC_irq_handler ();
 }
 
-#endif
+#endif /* PIOS_INCLUDE_RTC */
+
+#if defined(PIOS_INCLUDE_PPM)
+/*
+ * PPM Input
+ */
+// Timer 12 used for PPM input
+#include "pios_tim_priv.h"
+#include <pios_ppm_priv.h>
+
+static const TIM_TimeBaseInitTypeDef tim_12_time_base = {
+	.TIM_Prescaler = (PIOS_PERIPHERAL_APB1_CLOCK / 1000000) - 1,
+	.TIM_ClockDivision = TIM_CKD_DIV1,
+	.TIM_CounterMode = TIM_CounterMode_Up,
+	.TIM_Period = 0xFFFF,
+	.TIM_RepetitionCounter = 0x0000,
+};
+
+static const struct pios_tim_clock_cfg tim_12_cfg = {
+	.timer = TIM12,
+	.time_base_init = &tim_12_time_base,
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel                   = TIM8_BRK_TIM12_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_MID,
+			.NVIC_IRQChannelSubPriority        = 0,
+			.NVIC_IRQChannelCmd                = ENABLE,
+		},
+	},
+};
+
+static const struct pios_tim_channel pios_tim_ppm_channel[] = {
+	{
+		.timer = TIM12,
+		.timer_chan = TIM_Channel_1,
+		.remap = GPIO_AF_TIM12,
+		.pin = {
+			.gpio = GPIOB,
+			.init = {
+				.GPIO_Pin = GPIO_Pin_14,
+				.GPIO_Speed = GPIO_Speed_2MHz,
+				.GPIO_Mode  = GPIO_Mode_AF,
+				.GPIO_OType = GPIO_OType_PP,
+				.GPIO_PuPd  = GPIO_PuPd_UP
+			},
+			.pin_source = GPIO_PinSource14,
+		},
+	},
+};
+
+#include <pios_ppm_priv.h>
+static const struct pios_ppm_cfg pios_ppm_cfg = {
+	.tim_ic_init = {
+		.TIM_ICPolarity = TIM_ICPolarity_Rising,
+		.TIM_ICSelection = TIM_ICSelection_DirectTI,
+		.TIM_ICPrescaler = TIM_ICPSC_DIV1,
+		.TIM_ICFilter = 0x0,
+		.TIM_Channel = TIM_Channel_3,
+	},
+	.channels = &pios_tim_ppm_channel[0],
+	.num_channels = 1,
+};
+#endif /* PIOS_INCLUDE_PPM */
+
+
+// Set up timers that only have inputs on APB1
+static const TIM_TimeBaseInitTypeDef tim_5_time_base = {
+	.TIM_Prescaler = (PIOS_PERIPHERAL_APB1_CLOCK / 1000000) - 1,
+	.TIM_ClockDivision = TIM_CKD_DIV1,
+	.TIM_CounterMode = TIM_CounterMode_Up,
+	.TIM_Period = ((1000000 / PIOS_SERVO_UPDATE_HZ) - 1),
+	.TIM_RepetitionCounter = 0x0000,
+};
+
+static const struct pios_tim_clock_cfg tim_5_cfg = {
+	.timer = TIM5,
+	.time_base_init = &tim_5_time_base,
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel                   = TIM5_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_MID,
+			.NVIC_IRQChannelSubPriority        = 0,
+			.NVIC_IRQChannelCmd                = ENABLE,
+		},
+	},
+};
+
+#if defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM)
+
+/*
+ * 	OUTPUTS
+	1: TIM5_CH1 (PA0)
+	2: TIM5_CH2 (PA1)
+	3: TIM5_CH3 (PA2)
+	4: TIM5_CH4 (PA3)
+ */
+
+static const struct pios_tim_channel pios_tim_servoport_all_pins[] = {
+	{
+		.timer = TIM5,
+		.timer_chan = TIM_Channel_1,
+		.remap = GPIO_AF_TIM5,
+		.pin = {
+			.gpio = GPIOA,
+			.init = {
+				.GPIO_Pin = GPIO_Pin_0,
+				.GPIO_Speed = GPIO_Speed_2MHz,
+				.GPIO_Mode  = GPIO_Mode_AF,
+				.GPIO_OType = GPIO_OType_PP,
+				.GPIO_PuPd  = GPIO_PuPd_UP
+			},
+			.pin_source = GPIO_PinSource0,
+		},
+	},
+	{
+		.timer = TIM5,
+		.timer_chan = TIM_Channel_2,
+		.remap = GPIO_AF_TIM5,
+		.pin = {
+			.gpio = GPIOA,
+			.init = {
+				.GPIO_Pin = GPIO_Pin_1,
+				.GPIO_Speed = GPIO_Speed_2MHz,
+				.GPIO_Mode  = GPIO_Mode_AF,
+				.GPIO_OType = GPIO_OType_PP,
+				.GPIO_PuPd  = GPIO_PuPd_UP
+			},
+			.pin_source = GPIO_PinSource1,
+		},
+	},
+	{
+		.timer = TIM5,
+		.timer_chan = TIM_Channel_3,
+		.remap = GPIO_AF_TIM5,
+		.pin = {
+			.gpio = GPIOA,
+			.init = {
+				.GPIO_Pin = GPIO_Pin_2,
+				.GPIO_Speed = GPIO_Speed_2MHz,
+				.GPIO_Mode  = GPIO_Mode_AF,
+				.GPIO_OType = GPIO_OType_PP,
+				.GPIO_PuPd  = GPIO_PuPd_UP
+			},
+			.pin_source = GPIO_PinSource2,
+		},
+	},
+	{
+		.timer = TIM5,
+		.timer_chan = TIM_Channel_4,
+		.remap = GPIO_AF_TIM5,
+		.pin = {
+			.gpio = GPIOA,
+			.init = {
+				.GPIO_Pin = GPIO_Pin_3,
+				.GPIO_Speed = GPIO_Speed_2MHz,
+				.GPIO_Mode  = GPIO_Mode_AF,
+				.GPIO_OType = GPIO_OType_PP,
+				.GPIO_PuPd  = GPIO_PuPd_UP
+			},
+			.pin_source = GPIO_PinSource3,
+		},
+	}
+};
+
+/*
+ * Servo outputs
+ */
+#include <pios_servo_priv.h>
+
+const struct pios_servo_cfg pios_servo_cfg = {
+	.tim_oc_init = {
+		.TIM_OCMode = TIM_OCMode_PWM1,
+		.TIM_OutputState = TIM_OutputState_Enable,
+		.TIM_OutputNState = TIM_OutputNState_Disable,
+		.TIM_Pulse = PIOS_SERVOS_INITIAL_POSITION,
+		.TIM_OCPolarity = TIM_OCPolarity_High,
+		.TIM_OCNPolarity = TIM_OCPolarity_High,
+		.TIM_OCIdleState = TIM_OCIdleState_Reset,
+		.TIM_OCNIdleState = TIM_OCNIdleState_Reset,
+	},
+	.channels = pios_tim_servoport_all_pins,
+	.num_channels = NELEMENTS(pios_tim_servoport_all_pins),
+};
+#endif /* defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM) */
+
 /**
  * @}
  * @}

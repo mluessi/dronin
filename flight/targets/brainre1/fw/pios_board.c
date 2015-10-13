@@ -38,6 +38,7 @@
 #include "board_hw_defs.c"
 
 #include <pios.h>
+#include <pios_hal.h>
 #include <openpilot.h>
 #include <uavobjectsinit.h>
 #include "hwbrainre1.h"
@@ -131,11 +132,6 @@ static const struct pios_hmc5983_cfg pios_hmc5983_external_cfg = {
 #include "pios_frsky_rssi_priv.h"
 #endif /* PIOS_INCLUDE_FRSKY_RSSI */
 
-/* One slot per selectable receiver group.
- *  eg. PWM, PPM, GCS, SPEKTRUM1, SPEKTRUM2, SBUS
- * NOTE: No slot in this map for NONE.
- */
-uintptr_t pios_rcvr_group_map[MANUALCONTROLSETTINGS_CHANNELGROUPS_NONE];
 
 #define PIOS_COM_TELEM_RF_RX_BUF_LEN 512
 #define PIOS_COM_TELEM_RF_TX_BUF_LEN 512
@@ -166,30 +162,17 @@ uintptr_t pios_rcvr_group_map[MANUALCONTROLSETTINGS_CHANNELGROUPS_NONE];
 
 #if defined(PIOS_INCLUDE_DEBUG_CONSOLE)
 #define PIOS_COM_DEBUGCONSOLE_TX_BUF_LEN 40
-uintptr_t pios_com_debug_id;
 #endif /* PIOS_INCLUDE_DEBUG_CONSOLE */
 
 bool external_mag_fail;
 
-uintptr_t pios_com_gps_id;
-uintptr_t pios_com_telem_usb_id;
-uintptr_t pios_com_telem_rf_id;
-uintptr_t pios_com_vcp_id;
-uintptr_t pios_com_bridge_id;
-uintptr_t pios_com_mavlink_id;
-uintptr_t pios_com_overo_id;
-uintptr_t pios_internal_adc_id;
-uintptr_t pios_com_hott_id;
-uintptr_t pios_com_frsky_sensor_hub_id;
-uintptr_t pios_com_lighttelemetry_id;
-uintptr_t pios_com_picoc_id;
 uintptr_t pios_com_logging_id;
-uintptr_t pios_com_frsky_sport_id;
-
-
+uintptr_t pios_com_can_id;
+uintptr_t pios_internal_adc_id = 0;
 uintptr_t pios_uavo_settings_fs_id;
 uintptr_t pios_waypoints_settings_fs_id;
 uintptr_t streamfs_id;
+uintptr_t pios_com_telem_rf_id;
 
 /**
 * Initialise PWM Output for black/white level setting
@@ -412,10 +395,9 @@ void PIOS_Board_Init(void) {
 
 	/* Set up pulse timers */
 	//inputs
-	//PIOS_TIM_InitClock(&tim_8_cfg);
-	//PIOS_TIM_InitClock(&tim_12_cfg);
+	PIOS_TIM_InitClock(&tim_12_cfg);
 	//outputs
-	//PIOS_TIM_InitClock(&tim_5_cfg);
+	PIOS_TIM_InitClock(&tim_5_cfg);
 
 	/* IAP System Setup */
 	PIOS_IAP_Init();
@@ -565,6 +547,31 @@ void PIOS_Board_Init(void) {
 		PIOS_USBHOOK_Activate();
 	}
 #endif	/* PIOS_INCLUDE_USB */
+
+	/* Configure the RxPort*/
+
+	/* Configure IO ports */
+	HwBrainRE1DSMxModeOptions hw_DSMxMode;
+	HwBrainRE1DSMxModeGet(&hw_DSMxMode);
+
+	uint8_t hw_rxport;
+	HwBrainRE1RxPortGet(&hw_rxport);
+
+	PIOS_HAL_ConfigurePort(hw_rxport,
+			NULL,
+			NULL,
+			NULL, NULL,
+			&pios_ppm_cfg,
+			PIOS_LED_ALARM,
+			NULL,
+			NULL,
+			hw_DSMxMode, NULL,
+			NULL, false);
+
+	/* Configure PWM Outputs */
+#if defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM)
+	PIOS_Servo_Init(&pios_servo_cfg);
+#endif /* defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM) */
 
 	PIOS_WDG_Clear();
 	PIOS_DELAY_WaitmS(50);

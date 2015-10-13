@@ -154,6 +154,12 @@ SRC += $(MGRSLIB)/polarst.c
 include $(PIOS)/STM32F4xx/library_chibios.mk
 # SRC += $(PIOS)/STM32F4xx/pios_video.c
 
+## For RFM22b
+SRC += $(RSCODE)/berlekamp.c
+SRC += $(RSCODE)/crcgen.c
+SRC += $(RSCODE)/galois.c
+SRC += $(RSCODE)/rs.c
+
 ## PIOS Hardware (Common)
 SRC += $(PIOSCOMMON)/pios_delay.c
 SRC += $(PIOSCOMMON)/pios_gcsrcvr.c
@@ -167,6 +173,11 @@ SRC += $(PIOSCOMMON)/pios_mpxv7002.c
 SRC += $(PIOSCOMMON)/pios_crc.c
 SRC += $(PIOSCOMMON)/pios_com.c
 SRC += $(PIOSCOMMON)/pios_dsm.c
+SRC += $(PIOSCOMMON)/pios_openlrs.c
+SRC += $(PIOSCOMMON)/pios_openlrs_rcvr.c
+SRC += $(PIOSCOMMON)/pios_rfm22b.c
+SRC += $(PIOSCOMMON)/pios_rfm22b_com.c
+SRC += $(PIOSCOMMON)/pios_rfm22b_rcvr.c
 SRC += $(PIOSCOMMON)/pios_rcvr.c
 SRC += $(PIOSCOMMON)/pios_sbus.c
 SRC += $(PIOSCOMMON)/pios_hsum.c
@@ -185,6 +196,7 @@ SRC += $(PIOSCOMMON)/pios_mutex.c
 SRC += $(PIOSCOMMON)/pios_thread.c
 SRC += $(PIOSCOMMON)/pios_queue.c
 SRC += $(PIOSCOMMON)/pios_streamfs.c
+SRC += $(PIOSCOMMON)/pios_hal.c
 
 include ./UAVObjects.inc
 SRC += $(UAVOBJSRC)

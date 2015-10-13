@@ -65,6 +65,11 @@
 #define PIOS_INCLUDE_ETASV3
 #define PIOS_I2C_ETASV3_ADAPTER pios_i2c_flexi_id
 
+/* Variables related to the RFM22B functionality */
+//#define PIOS_INCLUDE_RFM22B
+//#define PIOS_INCLUDE_RFM22B_COM
+//#define PIOS_INCLUDE_OPENLRS
+
 #define FLASH_FREERTOS
 /* Com systems to include */
 #define PIOS_INCLUDE_COM
@@ -90,7 +95,10 @@
 #define PIOS_INCLUDE_SBUS
 #define PIOS_INCLUDE_PPM
 #define PIOS_INCLUDE_PWM
+//#define PIOS_INCLUDE_HSUM
 #define PIOS_INCLUDE_GCSRCVR
+//#define PIOS_INCLUDE_RFM22B_RCVR
+//#define PIOS_INCLUDE_OPENLRS_RCVR
 
 #define PIOS_INCLUDE_FLASH
 #define PIOS_INCLUDE_LOGFS_SETTINGS
