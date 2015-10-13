@@ -58,6 +58,7 @@
 #define PIOS_INCLUDE_FRSKY_RSSI
 
 /* Select the sensors to include */
+#define PIOS_INCLUDE_BMI160
 #define PIOS_INCLUDE_BMP280
 #define PIOS_INCLUDE_HMC5883
 #define PIOS_INCLUDE_HMC5983_I2C

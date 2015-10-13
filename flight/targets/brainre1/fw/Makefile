@@ -157,6 +157,7 @@ include $(PIOS)/STM32F4xx/library_chibios.mk
 ## PIOS Hardware (Common)
 SRC += $(PIOSCOMMON)/pios_delay.c
 SRC += $(PIOSCOMMON)/pios_gcsrcvr.c
+SRC += $(PIOSCOMMON)/pios_bmi160.c
 SRC += $(PIOSCOMMON)/pios_hmc5883.c
 SRC += $(PIOSCOMMON)/pios_hmc5983_i2c.c
 SRC += $(PIOSCOMMON)/pios_bmp280.c

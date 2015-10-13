@@ -50,6 +50,49 @@ extern const uint32_t _bu_payload_start;
 extern const uint32_t _bu_payload_end;
 extern const uint32_t _bu_payload_size;
 
+#if defined(PIOS_INCLUDE_BMI160)
+#include "pios_bmi160.h"
+
+static const struct pios_exti_cfg pios_exti_bmi160_cfg __exti_config = {
+	.vector = PIOS_BMI160_IRQHandler,
+	.line = EXTI_Line13,
+	.pin = {
+		.gpio = GPIOC,
+		.init = {
+			.GPIO_Pin = GPIO_Pin_13,
+			.GPIO_Speed = GPIO_Speed_2MHz,  // XXXX
+			.GPIO_Mode = GPIO_Mode_IN,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		},
+	},
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel = EXTI15_10_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_MID,
+			.NVIC_IRQChannelSubPriority = 0,
+			.NVIC_IRQChannelCmd = ENABLE,
+		},
+	},
+	.exti = {
+		.init = {
+			.EXTI_Line = EXTI_Line13, // matches above GPIO pin
+			.EXTI_Mode = EXTI_Mode_Interrupt,
+			.EXTI_Trigger = EXTI_Trigger_Rising,
+			.EXTI_LineCmd = ENABLE,
+		},
+	},
+};
+
+static const struct pios_bmi160_cfg pios_bmi160_cfg = {
+	.exti_cfg = &pios_exti_bmi160_cfg,
+	.orientation = PIOS_BMI160_TOP_0DEG,
+	.odr = PIOS_BMI160_ODR_1600_Hz,
+	.acc_range = PIOS_BMI160_RANGE_8G,
+	.gyro_range = PIOS_BMI160_RANGE_2000DPS,
+	.temperature_interleaving = 50
+};
+#endif /* PIOS_INCLUDE_BMI160 */
 
 #if defined(PIOS_INCLUDE_BMP280)
 #include "pios_bmp280_priv.h"
@@ -219,7 +262,7 @@ void OSD_configure_bw_levels(void)
 /**
  * Indicate a target-specific error code when a component fails to initialize
  * 1 pulse - flash chip
- * 2 pulses - MPU6050
+ * 2 pulses - BMI160
  * 3 pulses - HMC5883
  * 4 pulses - BMP280
  * 5 pulses - gyro I2C bus locked
@@ -263,18 +306,21 @@ void PIOS_Board_Init(void) {
 	PIOS_LED_Init(&pios_led_cfg);
 #endif	/* PIOS_INCLUDE_LED */
 
+#if defined(PIOS_INCLUDE_SPI)
+	if (PIOS_SPI_Init(&pios_spi_gyro_id, &pios_spi_gyro_cfg)) {
+		PIOS_DEBUG_Assert(0);
+	}
+	if (PIOS_SPI_Init(&pios_spi_flash_id, &pios_spi_flash_cfg)) {
+		PIOS_DEBUG_Assert(0);
+	}
+#endif
+
 #if defined(PIOS_INCLUDE_I2C)
 	if (PIOS_I2C_Init(&pios_i2c_internal_id, &pios_i2c_internal_cfg)) {
 		PIOS_DEBUG_Assert(0);
 	}
 	if (PIOS_I2C_CheckClear(pios_i2c_internal_id) != 0)
 		panic(3);
-#endif
-
-#if defined(PIOS_INCLUDE_SPI)
-	if (PIOS_SPI_Init(&pios_spi_flash_id, &pios_spi_flash_cfg)) {
-		PIOS_DEBUG_Assert(0);
-	}
 #endif
 
 #if defined(PIOS_INCLUDE_FLASH)
@@ -519,6 +565,22 @@ void PIOS_Board_Init(void) {
 		PIOS_USBHOOK_Activate();
 	}
 #endif	/* PIOS_INCLUDE_USB */
+
+	PIOS_WDG_Clear();
+	PIOS_DELAY_WaitmS(50);
+
+	PIOS_SENSORS_Init();
+
+#if defined(PIOS_INCLUDE_SPI)
+#if defined(PIOS_INCLUDE_BMI160)
+	if(PIOS_BMI160_Init(pios_spi_gyro_id, 0, &pios_bmi160_cfg) != 0){
+		panic(2);
+	}
+#endif /* PIOS_INCLUDE_BMI160 */
+#endif /* PIOS_INCLUDE_SPI */
+
+	//I2C is slow, sensor init as well, reset watchdog to prevent reset here
+	PIOS_WDG_Clear();
 
 #if defined(PIOS_INCLUDE_I2C)
 #if defined(PIOS_INCLUDE_BMP280)
