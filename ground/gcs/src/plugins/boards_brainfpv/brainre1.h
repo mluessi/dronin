@@ -1,13 +1,13 @@
 /**
  ******************************************************************************
- * @file       sparky.h
- * @author     Tau Labs, http://taulabs.org, Copyright (C) 2013
+ * @file       brainre1.h
+ * @author     BrainFPV 2015
  *
  * @addtogroup GCSPlugins GCS Plugins
  * @{
- * @addtogroup Boards_TauLabsPlugin Tau Labs boards support Plugin
+ * @addtogroup Boards_BrainFPVPlugin BrainFPV boards support Plugin
  * @{
- * @brief Plugin to support boards by the Tau Labs project
+ * @brief Plugin to support boards by BrainFPV
  *****************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -24,18 +24,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
-#ifndef BRAIN_H
-#define BRAIN_H
+#ifndef BRAINRE1_H
+#define BRAINRE1_H
 
 #include <coreplugin/iboardtype.h>
 
 class IBoardType;
 
-class Brain : public Core::IBoardType
+class BrainRE1 : public Core::IBoardType
 {
 public:
-    Brain();
-    virtual ~Brain();
+    BrainRE1();
+    virtual ~BrainRE1();
 
     virtual QString shortName();
     virtual QString boardDescription();
@@ -68,8 +68,8 @@ public:
     virtual QString getConnectionDiagram() { return ":/taulabs/images/sparky-connection-diagram.svg"; }
 
     virtual int queryMaxGyroRate();
-    QWidget * getBoardConfiguration(QWidget *parent, bool connected);
+    //QWidget * getBoardConfiguration(QWidget *parent, bool connected);
 };
 
 
-#endif // BRAIN_H
+#endif // BRAINRE1_H

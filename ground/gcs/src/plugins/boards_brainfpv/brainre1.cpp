@@ -1,13 +1,13 @@
 /**
  ******************************************************************************
- * @file       Brain.cpp
- * @author     Tau Labs, http://taulabs.org, Copyright (C) 2013
+ * @file       brainre1.cpp
+ * @author     BrainFPV 2015
  *
  * @addtogroup GCSPlugins GCS Plugins
  * @{
- * @addtogroup Boards_TauLabsPlugin Tau Labs boards support Plugin
+ * @addtogroup Boards_BrainFPVPlugin BrainFPV boards support Plugin
  * @{
- * @brief Plugin to support boards by the Tau Labs project
+ * @brief Plugin to support boards by BrainFPV
  *****************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -25,20 +25,20 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "brain.h"
+#include "brainre1.h"
 
 #include <uavobjectmanager.h>
 #include "uavobjectutil/uavobjectutilmanager.h"
 #include <extensionsystem/pluginmanager.h>
 
 #include "brainconfiguration.h"
-#include "hwbrain.h"
+#include "hwbrainre1.h"
 
 /**
  * @brief Brain::Brain
  *  This is the Brain board definition
  */
-Brain::Brain(void)
+BrainRE1::BrainRE1(void)
 {
     // Initialize our USB Structure definition here:
     USBInfo board;
@@ -47,33 +47,33 @@ Brain::Brain(void)
 
     setUSBInfo(board);
 
-    boardType = 0x8A;
+    boardType = 0x8B;
 
     // Define the bank of channels that are connected to a given timer
     channelBanks.resize(3);
-    channelBanks[0] = QVector<int> () << 1 << 2 << 3 << 4; // TIM5 main outputs
-    channelBanks[1] = QVector<int> () << 5 << 6 << 7 << 8; // TIM8 on receiverport
-    channelBanks[2] = QVector<int> () << 9 << 10; // TIM12 on receiverport
+    channelBanks[0] = QVector<int> () << 1 << 2 << 3 << 4; // TIM5
+    channelBanks[1] = QVector<int> () << 5 << 6; // TIM1
+    channelBanks[2] = QVector<int> () << 7 << 8; // TIM8
 }
 
-Brain::~Brain()
+BrainRE1::~BrainRE1()
 {
 
 }
 
 
-QString Brain::shortName()
+QString BrainRE1::shortName()
 {
-    return QString("Brain");
+    return QString("BrainRE1");
 }
 
-QString Brain::boardDescription()
+QString BrainRE1::boardDescription()
 {
-    return QString("Brain - FPV Flight Controller");
+    return QString("BrainFPV RE1 - FPV Racing Flight Controller");
 }
 
 //! Return which capabilities this board has
-bool Brain::queryCapabilities(BoardCapabilities capability)
+bool BrainRE1::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
@@ -85,7 +85,7 @@ bool Brain::queryCapabilities(BoardCapabilities capability)
     case BOARD_CAPABILITIES_BAROS:
         return true;
     case BOARD_CAPABILITIES_RADIO:
-        return false;
+        return true;
     case BOARD_CAPABILITIES_OSD:
         return true;
     }
@@ -98,24 +98,24 @@ bool Brain::queryCapabilities(BoardCapabilities capability)
  *  TODO: this is just a stub, we'll need to extend this a lot with multi protocol support
  * @return
  */
-QStringList Brain::getSupportedProtocols()
+QStringList BrainRE1::getSupportedProtocols()
 {
 
     return QStringList("uavtalk");
 }
 
-QPixmap Brain::getBoardPicture()
+QPixmap BrainRE1::getBoardPicture()
 {
     return QPixmap(":/brainfpv/images/brain.png");
 }
 
-QString Brain::getHwUAVO()
+QString BrainRE1::getHwUAVO()
 {
-    return "HwBrain";
+    return "HwBrainRE1";
 }
 
 //! Determine if this board supports configuring the receiver
-bool Brain::isInputConfigurationSupported()
+bool BrainRE1::isInputConfigurationSupported()
 {
     return true;
 }
@@ -126,45 +126,42 @@ bool Brain::isInputConfigurationSupported()
  * @param port_num which input port to configure (board specific numbering)
  * @return true if successfully configured or false otherwise
  */
-bool Brain::setInputOnPort(enum InputType type, int port_num)
+bool BrainRE1::setInputOnPort(enum InputType type, int port_num)
 {
     if (port_num != 0)
         return false;
 
     ExtensionSystem::PluginManager *pm = ExtensionSystem::PluginManager::instance();
     UAVObjectManager *uavoManager = pm->getObject<UAVObjectManager>();
-    HwBrain *hwBrain = HwBrain::GetInstance(uavoManager);
-    Q_ASSERT(hwBrain);
-    if (!hwBrain)
+    HwBrainRE1 *hwBrainRE1 = HwBrainRE1::GetInstance(uavoManager);
+    Q_ASSERT(hwBrainRE1);
+    if (!hwBrainRE1)
         return false;
 
-    HwBrain::DataFields settings = hwBrain->getData();
+    HwBrainRE1::DataFields settings = hwBrainRE1->getData();
 
     switch(type) {
     case INPUT_TYPE_PPM:
-        settings.RxPort = HwBrain::RXPORT_PPM;
-        break;
-    case INPUT_TYPE_PWM:
-        settings.RxPort = HwBrain::RXPORT_PWM;
+        settings.RxPort = HwBrainRE1::RXPORT_PPM;
         break;
     case INPUT_TYPE_SBUS:
-        settings.MainPort = HwBrain::MAINPORT_SBUS;
+        settings.RxPort = HwBrainRE1::RXPORT_SBUS;
         break;
     case INPUT_TYPE_DSM:
-        settings.MainPort = HwBrain::MAINPORT_DSM;
+        settings.RxPort = HwBrainRE1::RXPORT_DSM;
         break;
     case INPUT_TYPE_HOTTSUMD:
-        settings.MainPort = HwBrain::MAINPORT_HOTTSUMD;
+        settings.RxPort = HwBrainRE1::RXPORT_HOTTSUMD;
         break;
     case INPUT_TYPE_HOTTSUMH:
-        settings.MainPort = HwBrain::MAINPORT_HOTTSUMH;
+        settings.RxPort = HwBrainRE1::RXPORT_HOTTSUMH;
         break;
     default:
         return false;
     }
 
     // Apply these changes
-    hwBrain->setData(settings);
+    hwBrainRE1->setData(settings);
 
     return true;
 }
@@ -174,82 +171,43 @@ bool Brain::setInputOnPort(enum InputType type, int port_num)
  * @param port_num the port number to query (must be zero)
  * @return the selected input type
  */
-enum Core::IBoardType::InputType Brain::getInputOnPort(int port_num)
+enum Core::IBoardType::InputType BrainRE1::getInputOnPort(int port_num)
 {
     if (port_num != 0)
         return INPUT_TYPE_UNKNOWN;
 
     ExtensionSystem::PluginManager *pm = ExtensionSystem::PluginManager::instance();
     UAVObjectManager *uavoManager = pm->getObject<UAVObjectManager>();
-    HwBrain *hwBrain = HwBrain::GetInstance(uavoManager);
-    Q_ASSERT(hwBrain);
-    if (!hwBrain)
+    HwBrainRE1 *hwBrainRE1 = HwBrainRE1::GetInstance(uavoManager);
+    Q_ASSERT(hwBrainRE1);
+    if (!hwBrainRE1)
         return INPUT_TYPE_UNKNOWN;
 
-    HwBrain::DataFields settings = hwBrain->getData();
-
-    switch(settings.MainPort) {
-        case HwBrain::MAINPORT_SBUS:
-            return INPUT_TYPE_SBUS;
-        case HwBrain::MAINPORT_DSM:
-            return INPUT_TYPE_DSM;
-        case HwBrain::MAINPORT_HOTTSUMD:
-            return INPUT_TYPE_HOTTSUMD;
-        case HwBrain::MAINPORT_HOTTSUMH:
-            return INPUT_TYPE_HOTTSUMH;
-    }
-
-    switch(settings.FlxPort) {
-        case HwBrain::FLXPORT_DSM:
-            return INPUT_TYPE_DSM;
-        case HwBrain::FLXPORT_HOTTSUMD:
-            return INPUT_TYPE_HOTTSUMD;
-        case HwBrain::FLXPORT_HOTTSUMH:
-            return INPUT_TYPE_HOTTSUMH;
-    }
+    HwBrainRE1::DataFields settings = hwBrainRE1->getData();
 
     switch(settings.RxPort) {
-        case HwBrain::RXPORT_PPM:
-        case HwBrain::RXPORT_PPMPWM:
-        case HwBrain::RXPORT_PPMOUTPUTS:
-        case HwBrain::RXPORT_PPMUART:
-        case HwBrain::RXPORT_PPMUARTOUTPUTS:
-        case HwBrain::RXPORT_PPMFRSKY:
+        case HwBrainRE1::RXPORT_PPM:
             return INPUT_TYPE_PPM;
-        case HwBrain::RXPORT_PWM:
-            return INPUT_TYPE_PWM;
+        case HwBrainRE1::RXPORT_SBUS:
+            return INPUT_TYPE_SBUS;
+        case HwBrainRE1::RXPORT_DSM:
+            return INPUT_TYPE_DSM;
+        case HwBrainRE1::RXPORT_HOTTSUMD:
+            return INPUT_TYPE_HOTTSUMD;
+        case HwBrainRE1::RXPORT_HOTTSUMH:
+            return INPUT_TYPE_HOTTSUMH;
     }
 
     return INPUT_TYPE_UNKNOWN;
 }
 
-int Brain::queryMaxGyroRate()
+int BrainRE1::queryMaxGyroRate()
 {
-    ExtensionSystem::PluginManager *pm = ExtensionSystem::PluginManager::instance();
-    UAVObjectManager *uavoManager = pm->getObject<UAVObjectManager>();
-    HwBrain *hwBrain = HwBrain::GetInstance(uavoManager);
-    Q_ASSERT(hwBrain);
-    if (!hwBrain)
-        return 0;
-
-    HwBrain::DataFields settings = hwBrain->getData();
-
-    switch(settings.GyroFullScale) {
-    case HwBrain::GYROFULLSCALE_250:
-        return 250;
-    case HwBrain::GYROFULLSCALE_500:
-        return 500;
-    case HwBrain::GYROFULLSCALE_1000:
-        return 1000;
-    case HwBrain::GYROFULLSCALE_2000:
-        return 2000;
-    default:
-        return 2000;
-    }
+    return 2000;
 }
 
-QWidget * Brain::getBoardConfiguration(QWidget *parent, bool connected)
-{
-    Q_UNUSED(connected);
-    return new BrainConfiguration(parent);
-}
+//QWidget * Brain::getBoardConfiguration(QWidget *parent, bool connected)
+//{
+//    Q_UNUSED(connected);
+//    return new BrainConfiguration(parent);
+//}
