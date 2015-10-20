@@ -130,18 +130,23 @@ int32_t PIOS_BMI160_Init(uint32_t spi_id, uint32_t slave_num, const struct pios_
 	switch (cfg->gyro_range){
 		case PIOS_BMI160_RANGE_125DPS:
 			dev->gyro_scale = 1.f / 262.4f;
+			PIOS_SENSORS_SetMaxGyro(125);
 			break;
 		case PIOS_BMI160_RANGE_250DPS:
 			dev->gyro_scale = 1.f / 131.2f;
+			PIOS_SENSORS_SetMaxGyro(250);
 			break;
 		case PIOS_BMI160_RANGE_500DPS:
 			dev->gyro_scale = 1.f / 65.6f;
+			PIOS_SENSORS_SetMaxGyro(500);
 			break;
 		case PIOS_BMI160_RANGE_1000DPS:
 			dev->gyro_scale = 1.f / 32.8f;
+			PIOS_SENSORS_SetMaxGyro(1000);
 			break;
 		case PIOS_BMI160_RANGE_2000DPS:
 			dev->gyro_scale = 1.f / 16.4f;
+			PIOS_SENSORS_SetMaxGyro(2000);
 			break;
 	}
 
