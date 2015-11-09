@@ -562,6 +562,7 @@ void PIOS_Board_Init(void) {
 			NULL,
 			NULL, NULL,
 			&pios_ppm_cfg,
+			NULL,
 			PIOS_LED_ALARM,
 			NULL,
 			NULL,
