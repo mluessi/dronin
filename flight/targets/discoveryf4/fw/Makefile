@@ -178,11 +178,12 @@ CDEFS += -DARM_MATH_MATRIX_CHECK
 CDEFS += -DARM_MATH_ROUNDING
 CDEFS += -D__FPU_PRESENT=1
 CDEFS += -DUNALIGNED_SUPPORT_DISABLE
+<<<<<<< 3cef1dda8163a11150d3ab7e8aaec73c15a94078
 
 # This is not the best place for these.  Really should abstract out
 # to the board file or something
 #CFLAGS += -DSTM32F4XX
-
+CFLAGS += -D$(STM32_TYPE)
 
 # Debugging format.
 DEBUGF = dwarf-2
