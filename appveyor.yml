@@ -1,10 +1,10 @@
-# Appveyor build configuration for Tau Labs by shred
+# Appveyor build configuration for dRonin
 
 os: MinGW
 install:
-  - set QTDIR=C:\Qt\5.4
-  - set PATH=%PATH%;%QTDIR%\mingw491_32\bin;C:\Qt\Tools\mingw491_32\bin;C:\MinGW\bin
+  - set QTDIR=C:\Qt\5.5
+  - set PATH=%PATH%;%QTDIR%\mingw492_32\bin;C:\Qt\Tools\mingw492_32\bin;C:\MinGW\bin
   - cmd: cinst wget -x86
   - cmd: cinst 7zip.commandline -x86
 #  - mingw32-make arm_sdk_install
-  - mingw32-make -j4 gcs
+  - mingw32-make -j2 gcs
