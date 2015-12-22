@@ -91,7 +91,7 @@ OPUAVOBJINC = $(OPUAVOBJ)/inc
 FLIGHTPLANLIB = $(OPMODULEDIR)/FlightPlan/lib
 FLIGHTPLANS = $(OPMODULEDIR)/FlightPlan/flightplans
 MAVLINKINC = $(FLIGHTLIB)/mavlink/v1.0/common
-CMSISDIR = $(STMLIBDIR)/CMSIS4/Device/ST/STM32F4xx/Include
+CMSISDIR = $(STMLIBDIR)/CMSIS/Device/ST/STM32F4xx/Include
 
 # optional component libraries
 include $(APPLIBDIR)/ChibiOS/library.mk
@@ -113,7 +113,6 @@ SRC += pios_usb_board_data.c
 SRC += $(FLIGHTLIB)/alarms.c
 SRC += $(OPUAVTALK)/uavtalk.c
 SRC += $(OPUAVOBJ)/uavobjectmanager.c
-SRC += $(OPUAVOBJ)/eventdispatcher.c
 
 ifeq ($(DEBUG),YES)
 SRC += $(DEBUG_CM3_DIR)/dcc_stdio.c
@@ -138,6 +137,7 @@ SRC += $(FLIGHTLIB)/taskmonitor.c
 SRC += $(FLIGHTLIB)/sanitycheck.c
 SRC += $(FLIGHTLIB)/timeutils.c
 SRC += $(FLIGHTLIB)/frsky_packing.c
+SRC += $(FLIGHTLIB)/circqueue.c
 SRC += $(MATHLIB)/coordinate_conversions.c
 SRC += $(MATHLIB)/misc_math.c
 SRC += $(MATHLIB)/pid.c
@@ -261,10 +261,7 @@ CDEFS += -DARM_MATH_MATRIX_CHECK
 CDEFS += -DARM_MATH_ROUNDING
 CDEFS += -D__FPU_PRESENT=1
 CDEFS += -DUNALIGNED_SUPPORT_DISABLE
-
-# This is not the best place for these.  Really should abstract out
-# to the board file or something
-CDEFS += -DSTM32F446xx
+CFLAGS += -D$(STM32_TYPE)
 
 # Debugging format.
 DEBUGF = dwarf-2
@@ -325,7 +322,7 @@ CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wdouble-promotion
 
 CFLAGS += -Wall
-#CFLAGS += -Werror
+CFLAGS += -Werror
 CFLAGS += -Wa,-adhlns=$(addprefix $(OUTDIR)/, $(notdir $(addsuffix .lst, $(basename $<))))
 # Compiler flags to generate dependency files:
 CFLAGS += -MD -MP -MF $(OUTDIR)/dep/$(@F).d
@@ -360,5 +357,5 @@ LDFLAGS += -T memory.ld $(addprefix -T,$(LINKER_SCRIPTS_APP))
 include ./UAVObjects.inc
 
 UAVO_NAV = YES
-include $(PIOSCOMMONLIB)/CMSIS4/library.mk
+include $(PIOSCOMMONLIB)/CMSIS3/library.mk
 include $(MAKE_INC_DIR)/firmware-common.mk

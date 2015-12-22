@@ -6,8 +6,7 @@ HW_TYPE             := 0x00		# seems to be unused
 MCU                 := cortex-m4
 CHIP                := STM32F446RET
 BOARD               := STM32F4xx_BRAINFPVRE1
-CDEFS               += -DSTM32F446xx
-#CDEFS               += -DSTM32F40_41xxx
+STM32_TYPE          := STM32F446xx
 MODEL               := HD
 MODEL_SUFFIX        := 
 
@@ -31,4 +30,4 @@ EF_BANK_BASE        := 0x08000000  # Start of entire flash image (usually start 
 EF_BANK_SIZE        := 0x00080000  # Size of the entire flash image (from bootloader until end of firmware)
 
 OSCILLATOR_FREQ     :=  16000000
-SYSCLK_FREQ         := 168000000
+SYSCLK_FREQ         := 180000000

@@ -237,22 +237,6 @@ extern uint32_t pios_packet_handler;
 //--------------------------
 #define PIOS_TIM_MAX_DEVS				8
 
-//-------------------------
-// ADC
-// PIOS_ADC_PinGet(0) = Voltage 1
-// PIOS_ADC_PinGet(1) = Voltage 2
-// PIOS_ADC_PinGet(4) = VREF
-// PIOS_ADC_PinGet(5) = Temperature sensor
-// -------------------------
-#define PIOS_DMA_PIN_CONFIG                                                                 \
-    {                                                                                           \
-		{ GPIOC, GPIO_Pin_0, ADC_Channel_10 },                                                \
-		{ GPIOC, GPIO_Pin_1, ADC_Channel_11 },                                                \
-		{ GPIOC, GPIO_Pin_3, ADC_Channel_13 },                                                \
-        { NULL, 0, ADC_Channel_Vrefint }, /* Voltage reference */         \
-        { NULL, 0, ADC_Channel_TempSensor }, /* Temperature sensor */        \
-    }
-
 /* we have to do all this to satisfy the PIOS_ADC_MAX_SAMPLES define in pios_adc.h */
 /* which is annoying because this then determines the rate at which we generate buffer turnover events */
 /* the objective here is to get enough buffer space to support 100Hz averaging rate */

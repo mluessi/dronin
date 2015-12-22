@@ -367,7 +367,6 @@ void PIOS_Board_Init(void) {
 	RCC_ClearFlag(); // The flags cleared after use
 
 	/* Initialize UAVObject libraries */
-	EventDispatcherInitialize();
 	UAVObjInitialize();
 
 	HwBrainRE1Initialize();
@@ -560,14 +559,18 @@ void PIOS_Board_Init(void) {
 	PIOS_HAL_ConfigurePort(hw_rxport,
 			NULL,
 			NULL,
-			NULL, NULL,
+			NULL,
+			NULL,
+			NULL,
 			&pios_ppm_cfg,
 			NULL,
 			PIOS_LED_ALARM,
 			NULL,
 			NULL,
-			hw_DSMxMode, NULL,
-			NULL, false);
+			hw_DSMxMode,
+			NULL,
+			NULL,
+			false);
 
 	/* Configure PWM Outputs */
 #if defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM)
