@@ -13,6 +13,20 @@
 	</options>
 	</field>
 
+	<field name="SerialPort1" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Telemetry">
+		<options>
+			<option>Disabled</option>
+			<option>Telemetry</option>
+			<option>GPS</option>
+			<option>DebugConsole</option>
+			<option>ComBridge</option>
+			<option>MavLinkTX</option>
+			<option>MavLinkTX_GPS_RX</option>
+			<option>MSP</option>
+			<option>OpenLog</option>
+		</options>
+	</field>
+
 	<field name="DSMxMode" units="mode" type="enum" elements="1" parent="HwShared.DSMxMode" defaultvalue="Autodetect"/>
 
 	<field name="USB_HIDPort" units="function" type="enum" elements="1" options="USBTelemetry,RCTransmitter,Disabled" defaultvalue="USBTelemetry"/>

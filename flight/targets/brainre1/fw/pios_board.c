@@ -572,6 +572,26 @@ void PIOS_Board_Init(void) {
 			NULL,
 			false);
 
+	/* SerialPort1 */
+	uint8_t hw_sp1;
+	HwBrainRE1SerialPort1Get(&hw_sp1);
+
+	PIOS_HAL_ConfigurePort(hw_sp1,               // port type protocol
+			&pios_usart1_cfg,                    // usart_port_cfg
+			NULL,                                // frsky usart_port_cfg
+			&pios_usart_com_driver,              // com_driver
+			NULL,                                // i2c_id
+			NULL,                                // i2c_cfg
+			NULL,                                // ppm_cfg
+			NULL,                                // pwm_cfg
+			PIOS_LED_ALARM,                      // led_id
+			NULL,                                // usart_dsm_hsum_cfg
+			NULL,                                // dsm_cfg
+			0,                                   // dsm_mode
+			NULL,                                // sbus_rcvr_cfg
+			NULL,                                // sbus_cfg
+			false);                              // sbus_toggle
+
 	/* Configure PWM Outputs */
 #if defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM)
 	PIOS_Servo_Init(&pios_servo_cfg);
