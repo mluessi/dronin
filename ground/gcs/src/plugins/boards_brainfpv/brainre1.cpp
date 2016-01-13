@@ -53,7 +53,7 @@ BrainRE1::BrainRE1(void)
     channelBanks.resize(3);
     channelBanks[0] = QVector<int> () << 1 << 2 << 3 << 4; // TIM5
     channelBanks[1] = QVector<int> () << 5 << 6; // TIM1
-    channelBanks[2] = QVector<int> () << 7 << 8; // TIM8
+    channelBanks[2] = QVector<int> () << 7 << 8; // TIM3
 }
 
 BrainRE1::~BrainRE1()

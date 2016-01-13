@@ -181,7 +181,7 @@ uintptr_t external_i2c_adapter_id = 0;
  * 9 pulses - HMC5883 on uart3 I2C
  */
 void panic(int32_t code) {
-    PIOS_HAL_Panic(PIOS_LED_ALARM, code);
+	PIOS_HAL_Panic(PIOS_LED_ALARM, code);
 }
 
 /**

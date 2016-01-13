@@ -13,24 +13,35 @@
 	</options>
 	</field>
 
-	<field name="SerialPort1" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Telemetry">
+	<field name="SerialPort" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Disabled">
 		<options>
 			<option>Disabled</option>
 			<option>Telemetry</option>
 			<option>GPS</option>
 			<option>DebugConsole</option>
 			<option>ComBridge</option>
-			<option>MavLinkTX</option>
-			<option>MavLinkTX_GPS_RX</option>
-			<option>MSP</option>
 			<option>OpenLog</option>
+			<option>MSP</option>
+		</options>
+	</field>
+
+	<field name="MultiPort" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Disabled">
+		<options>
+			<option>Disabled</option>
+			<option>PWM</option>
+			<option>Telemetry</option>
+			<option>GPS</option>
+			<option>DebugConsole</option>
+			<option>ComBridge</option>
+			<option>OpenLog</option>
+			<option>MSP</option>
 		</options>
 	</field>
 
 	<field name="DSMxMode" units="mode" type="enum" elements="1" parent="HwShared.DSMxMode" defaultvalue="Autodetect"/>
 
-	<field name="USB_HIDPort" units="function" type="enum" elements="1" options="USBTelemetry,RCTransmitter,Disabled" defaultvalue="USBTelemetry"/>
-	<field name="USB_VCPPort" units="function" type="enum" elements="1" options="USBTelemetry,ComBridge,DebugConsole,Disabled" defaultvalue="Disabled"/>
+	<field name="USB_HIDPort" units="function" type="enum" elements="1" parent="HwShared.USB_HIDPort" defaultvalue="USBTelemetry"/>
+	<field name="USB_VCPPort" units="function" type="enum" elements="1" parent="HwShared.USB_VCPPort" defaultvalue="Disabled"/>
 
 	<field name="DSMxBind" units=""  type="uint8"  elements="1" defaultvalue="0"/>
 

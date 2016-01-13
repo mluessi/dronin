@@ -132,47 +132,13 @@ static const struct pios_hmc5983_cfg pios_hmc5983_external_cfg = {
 #include "pios_frsky_rssi_priv.h"
 #endif /* PIOS_INCLUDE_FRSKY_RSSI */
 
-
-#define PIOS_COM_TELEM_RF_RX_BUF_LEN 512
-#define PIOS_COM_TELEM_RF_TX_BUF_LEN 512
-
-#define PIOS_COM_GPS_RX_BUF_LEN 32
-#define PIOS_COM_GPS_TX_BUF_LEN 16
-
-#define PIOS_COM_TELEM_USB_RX_BUF_LEN 65
-#define PIOS_COM_TELEM_USB_TX_BUF_LEN 65
-
-#define PIOS_COM_BRIDGE_RX_BUF_LEN 65
-#define PIOS_COM_BRIDGE_TX_BUF_LEN 12
-
-#define PIOS_COM_MAVLINK_TX_BUF_LEN 128
-
-#define PIOS_COM_HOTT_RX_BUF_LEN 16
-#define PIOS_COM_HOTT_TX_BUF_LEN 16
-
-#define PIOS_COM_FRSKYSENSORHUB_TX_BUF_LEN 128
-
-#define PIOS_COM_LIGHTTELEMETRY_TX_BUF_LEN 19
-
-#define PIOS_COM_PICOC_RX_BUF_LEN 128
-#define PIOS_COM_PICOC_TX_BUF_LEN 128
-
-#define PIOS_COM_FRSKYSPORT_TX_BUF_LEN 16
-#define PIOS_COM_FRSKYSPORT_RX_BUF_LEN 16
-
-#if defined(PIOS_INCLUDE_DEBUG_CONSOLE)
-#define PIOS_COM_DEBUGCONSOLE_TX_BUF_LEN 40
-#endif /* PIOS_INCLUDE_DEBUG_CONSOLE */
-
 bool external_mag_fail;
 
 uintptr_t pios_com_logging_id;
-uintptr_t pios_com_can_id;
 uintptr_t pios_internal_adc_id = 0;
 uintptr_t pios_uavo_settings_fs_id;
 uintptr_t pios_waypoints_settings_fs_id;
 uintptr_t streamfs_id;
-uintptr_t pios_com_telem_rf_id;
 
 /**
 * Initialise PWM Output for black/white level setting
@@ -246,28 +212,13 @@ void OSD_configure_bw_levels(void)
  * Indicate a target-specific error code when a component fails to initialize
  * 1 pulse - flash chip
  * 2 pulses - BMI160
- * 3 pulses - HMC5883
- * 4 pulses - BMP280
+ * FIXME
  * 5 pulses - gyro I2C bus locked
  * 6 pulses - mag/baro I2C bus locked
  */
-static void panic(int32_t code) {
-	while(1){
-		for (int32_t i = 0; i < code; i++) {
-			PIOS_WDG_Clear();
-			PIOS_LED_On(PIOS_LED_HEARTBEAT);
-			PIOS_DELAY_WaitmS(200);
-			PIOS_WDG_Clear();
-			PIOS_LED_Off(PIOS_LED_HEARTBEAT);
-			PIOS_DELAY_WaitmS(100);
-			PIOS_WDG_Clear();
-		}
-		PIOS_DELAY_WaitmS(500);
-		PIOS_WDG_Clear();
-		PIOS_DELAY_WaitmS(500);
-		PIOS_WDG_Clear();
-	}
-}
+void panic(int32_t code) {
+	PIOS_HAL_Panic(PIOS_LED_ALARM, code);
+ }
 
 /**
  * PIOS_Board_Init()
@@ -396,6 +347,8 @@ void PIOS_Board_Init(void) {
 	//inputs
 	PIOS_TIM_InitClock(&tim_12_cfg);
 	//outputs
+	PIOS_TIM_InitClock(&tim_1_cfg);
+	PIOS_TIM_InitClock(&tim_3_cfg);
 	PIOS_TIM_InitClock(&tim_5_cfg);
 
 	/* IAP System Setup */
@@ -446,62 +399,7 @@ void PIOS_Board_Init(void) {
 		hw_usb_vcpport = HWBRAINRE1_USB_VCPPORT_DISABLED;
 	}
 
-	uintptr_t pios_usb_cdc_id;
-	if (PIOS_USB_CDC_Init(&pios_usb_cdc_id, &pios_usb_cdc_cfg, pios_usb_id)) {
-		PIOS_Assert(0);
-	}
-
-	//hw_usb_vcpport = HWBRAINRE1_USB_VCPPORT_DISABLED;
-	switch (hw_usb_vcpport) {
-	case HWBRAINRE1_USB_VCPPORT_DISABLED:
-		break;
-	case HWBRAINRE1_USB_VCPPORT_USBTELEMETRY:
-#if defined(PIOS_INCLUDE_COM)
-	{
-		uint8_t * rx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_TELEM_USB_RX_BUF_LEN);
-		uint8_t * tx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_TELEM_USB_TX_BUF_LEN);
-		PIOS_Assert(rx_buffer);
-		PIOS_Assert(tx_buffer);
-		if (PIOS_COM_Init(&pios_com_telem_usb_id, &pios_usb_cdc_com_driver, pios_usb_cdc_id,
-						  rx_buffer, PIOS_COM_TELEM_USB_RX_BUF_LEN,
-						  tx_buffer, PIOS_COM_TELEM_USB_TX_BUF_LEN)) {
-			PIOS_Assert(0);
-		}
-	}
-#endif	/* PIOS_INCLUDE_COM */
-		break;
-	case HWBRAINRE1_USB_VCPPORT_COMBRIDGE:
-#if defined(PIOS_INCLUDE_COM)
-	{
-		uint8_t * rx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_BRIDGE_RX_BUF_LEN);
-		uint8_t * tx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_BRIDGE_TX_BUF_LEN);
-		PIOS_Assert(rx_buffer);
-		PIOS_Assert(tx_buffer);
-		if (PIOS_COM_Init(&pios_com_vcp_id, &pios_usb_cdc_com_driver, pios_usb_cdc_id,
-						  rx_buffer, PIOS_COM_BRIDGE_RX_BUF_LEN,
-						  tx_buffer, PIOS_COM_BRIDGE_TX_BUF_LEN)) {
-			PIOS_Assert(0);
-		}
-	}
-#endif	/* PIOS_INCLUDE_COM */
-		break;
-	case HWBRAINRE1_USB_VCPPORT_DEBUGCONSOLE:
-#if defined(PIOS_INCLUDE_COM)
-#if defined(PIOS_INCLUDE_DEBUG_CONSOLE)
-	{
-		uint8_t * tx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_DEBUGCONSOLE_TX_BUF_LEN);
-		PIOS_Assert(tx_buffer);
-		if (PIOS_COM_Init(&pios_com_debug_id, &pios_usb_cdc_com_driver, pios_usb_cdc_id,
-						  NULL, 0,
-						  tx_buffer, PIOS_COM_DEBUGCONSOLE_TX_BUF_LEN)) {
-			PIOS_Assert(0);
-		}
-	}
-#endif	/* PIOS_INCLUDE_DEBUG_CONSOLE */
-#endif	/* PIOS_INCLUDE_COM */
-
-		break;
-	}
+	PIOS_HAL_ConfigureCDC(hw_usb_vcpport, pios_usb_id, &pios_usb_cdc_cfg);
 #endif	/* PIOS_INCLUDE_USB_CDC */
 
 #if defined(PIOS_INCLUDE_USB_HID)
@@ -514,32 +412,7 @@ void PIOS_Board_Init(void) {
 		hw_usb_hidport = HWBRAINRE1_USB_HIDPORT_DISABLED;
 	}
 
-	uintptr_t pios_usb_hid_id;
-	if (PIOS_USB_HID_Init(&pios_usb_hid_id, &pios_usb_hid_cfg, pios_usb_id)) {
-		PIOS_Assert(0);
-	}
-
-	hw_usb_hidport = HWBRAINRE1_USB_HIDPORT_USBTELEMETRY;
-	switch (hw_usb_hidport) {
-	case HWBRAINRE1_USB_HIDPORT_DISABLED:
-		break;
-	case HWBRAINRE1_USB_HIDPORT_USBTELEMETRY:
-#if defined(PIOS_INCLUDE_COM)
-	{
-		uint8_t * rx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_TELEM_USB_RX_BUF_LEN);
-		uint8_t * tx_buffer = (uint8_t *) PIOS_malloc(PIOS_COM_TELEM_USB_TX_BUF_LEN);
-		PIOS_Assert(rx_buffer);
-		PIOS_Assert(tx_buffer);
-		if (PIOS_COM_Init(&pios_com_telem_usb_id, &pios_usb_hid_com_driver, pios_usb_hid_id,
-						  rx_buffer, PIOS_COM_TELEM_USB_RX_BUF_LEN,
-						  tx_buffer, PIOS_COM_TELEM_USB_TX_BUF_LEN)) {
-			PIOS_Assert(0);
-		}
-	}
-#endif	/* PIOS_INCLUDE_COM */
-		break;
-	}
-
+	PIOS_HAL_ConfigureHID(hw_usb_hidport, pios_usb_id, &pios_usb_hid_cfg);
 #endif	/* PIOS_INCLUDE_USB_HID */
 
 	if (usb_hid_present || usb_cdc_present) {
@@ -573,10 +446,10 @@ void PIOS_Board_Init(void) {
 			false);
 
 	/* SerialPort1 */
-	uint8_t hw_sp1;
-	HwBrainRE1SerialPort1Get(&hw_sp1);
+	uint8_t hw_sp;
+	HwBrainRE1SerialPortGet(&hw_sp);
 
-	PIOS_HAL_ConfigurePort(hw_sp1,               // port type protocol
+	PIOS_HAL_ConfigurePort(hw_sp,                // port type protocol
 			&pios_usart1_cfg,                    // usart_port_cfg
 			NULL,                                // frsky usart_port_cfg
 			&pios_usart_com_driver,              // com_driver
@@ -592,9 +465,43 @@ void PIOS_Board_Init(void) {
 			NULL,                                // sbus_cfg
 			false);                              // sbus_toggle
 
+	/* Multi-function port (pwm, serial, etc) */
+	uint8_t hw_mp;
+	HwBrainRE1MultiPortGet(&hw_mp);
+
+	switch (hw_mp) {
+		case HWBRAINRE1_MULTIPORT_PWM:
+			// for us, this means PWM output, not input
+			break;
+		default:
+			PIOS_HAL_ConfigurePort(hw_mp,                // port type protocol
+					&pios_usart6_cfg,                    // usart_port_cfg
+					NULL,                                // frsky usart_port_cfg
+					&pios_usart_com_driver,              // com_driver
+					NULL,                                // i2c_id
+					NULL,                                // i2c_cfg
+					NULL,                                // ppm_cfg
+					NULL,                                // pwm_cfg
+					PIOS_LED_ALARM,                      // led_id
+					NULL,                                // usart_dsm_hsum_cfg
+					NULL,                                // dsm_cfg
+					0,                                   // dsm_mode
+					NULL,                                // sbus_rcvr_cfg
+					NULL,                                // sbus_cfg
+					false);                              // sbus_toggle
+			break;
+	}
+
 	/* Configure PWM Outputs */
 #if defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM)
-	PIOS_Servo_Init(&pios_servo_cfg);
+	if (hw_mp == HWBRAINRE1_MULTIPORT_PWM) {
+		// all 8 PWM outputs are used
+		PIOS_Servo_Init(&pios_servo_all_cfg);
+	}
+	else {
+		// only 6 PWM outputs are used
+		PIOS_Servo_Init(&pios_servo_cfg);
+	}
 #endif /* defined(PIOS_INCLUDE_SERVO) && defined(PIOS_INCLUDE_TIM) */
 
 	PIOS_WDG_Clear();
