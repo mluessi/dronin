@@ -261,7 +261,7 @@ void PIOS_Board_Init(void) {
 	/* Inititialize all flash drivers */
 	if (PIOS_Flash_Internal_Init(&pios_internal_flash_id, &flash_internal_cfg) != 0)
 		panic(1);
-	if (PIOS_Flash_Jedec_Init(&pios_external_flash_id, pios_spi_flash_id, 0, &flash_s25fl_cfg) != 0)
+	if (PIOS_Flash_Jedec_Init(&pios_external_flash_id, pios_spi_flash_id, 0, &flash_s25fl127_cfg) != 0)
 		panic(1);
 
 	/* Register the partition table */
@@ -517,7 +517,7 @@ void PIOS_Board_Init(void) {
 #endif /* PIOS_INCLUDE_BMI160 */
 #endif /* PIOS_INCLUDE_SPI */
 
-	//I2C is slow, sensor init as well, reset watchdog to prevent reset here
+	//I2C is slow, sensor init as well, reset watchdog tPIOS_STREAMFS_Inito prevent reset here
 	PIOS_WDG_Clear();
 
 #if defined(PIOS_INCLUDE_I2C)
@@ -527,6 +527,20 @@ void PIOS_Board_Init(void) {
 	}
 #endif /* PIOS_INCLUDE_BMP280 */
 #endif /* I2C */
+
+#if defined(PIOS_INCLUDE_FLASH)
+	if (PIOS_STREAMFS_Init(&streamfs_id, &streamfs_settings, FLASH_PARTITION_LABEL_LOG) != 0) {
+		panic(8);
+	}
+
+	const uint32_t LOG_BUF_LEN = 256;
+	uint8_t *log_rx_buffer = PIOS_malloc(LOG_BUF_LEN);
+	uint8_t *log_tx_buffer = PIOS_malloc(LOG_BUF_LEN);
+	if (PIOS_COM_Init(&pios_com_logging_id, &pios_streamfs_com_driver, streamfs_id,
+					  log_rx_buffer, LOG_BUF_LEN, log_tx_buffer, LOG_BUF_LEN) != 0){
+		panic(9);
+	}
+#endif /* PIOS_INCLUDE_FLASH */
 }
 
 /**

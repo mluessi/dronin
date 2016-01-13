@@ -83,30 +83,30 @@ const struct pios_led_cfg * PIOS_BOARD_HW_DEFS_GetLedCfg (uint32_t board_revisio
 
 static const struct flashfs_logfs_cfg flashfs_settings_cfg = {
 	.fs_magic      = 0x3bb141cf,
-	.arena_size    = 0x00004000, /* 64 * slot size */
+	.arena_size    = 0x00004000, /* 256 * slot size */
 	.slot_size     = 0x00000100, /* 256 bytes */
 };
 
 static const struct flashfs_logfs_cfg flashfs_waypoints_cfg = {
 	.fs_magic      = 0x9a365a64,
-	.arena_size    = 0x00004000, /* 64 * slot size */
+	.arena_size    = 0x00010000, /* 2048 * slot size */
 	.slot_size     = 0x00000040, /* 64 bytes */
 };
 
 #include "pios_streamfs_priv.h"
 const struct streamfs_cfg streamfs_settings = {
 	.fs_magic      = 0x89abceef,
-	.arena_size    = 0x00001000, /* 64 KB */
+	.arena_size    = 0x00010000, /* 64 KB */
 	.write_size    = 0x00000100, /* 256 bytes */
 };
 
 #if defined(PIOS_INCLUDE_FLASH_JEDEC)
 #include "pios_flash_jedec_priv.h"
 
-static const struct pios_flash_jedec_cfg flash_s25fl_cfg = {
+static const struct pios_flash_jedec_cfg flash_s25fl127_cfg = {
 	.expect_manufacturer = JEDEC_MANUFACTURER_SPANISON,
-	.expect_memorytype   = 0x40,
-	.expect_capacity     = 0x17,
+	.expect_memorytype   = 0x20,
+	.expect_capacity     = 0x18,
 	.sector_erase        = 0x20,
 };
 #endif	/* PIOS_INCLUDE_FLASH_JEDEC */
@@ -151,12 +151,17 @@ static const struct pios_flash_chip pios_flash_chip_internal = {
 #endif	/* PIOS_INCLUDE_FLASH_INTERNAL */
 
 #if defined(PIOS_INCLUDE_FLASH_JEDEC)
-static const struct pios_flash_sector_range mx25_sectors[] = {
+static const struct pios_flash_sector_range s25fl127_sectors[] = {
 	{
 		.base_sector = 0,
-		.last_sector = 2047,
+		.last_sector = 15,
 		.sector_size = FLASH_SECTOR_4KB,
 	},
+	{
+		.base_sector = 16,
+		.last_sector = 270,
+		.sector_size = FLASH_SECTOR_64KB,
+	}
 };
 
 uintptr_t pios_external_flash_id;
@@ -164,8 +169,8 @@ static const struct pios_flash_chip pios_flash_chip_external = {
 	.driver        = &pios_jedec_flash_driver,
 	.chip_id       = &pios_external_flash_id,
 	.page_size     = 256,
-	.sector_blocks = mx25_sectors,
-	.num_blocks    = NELEMENTS(mx25_sectors),
+	.sector_blocks = s25fl127_sectors,
+	.num_blocks    = NELEMENTS(s25fl127_sectors),
 };
 #endif /* PIOS_INCLUDE_FLASH_JEDEC */
 
@@ -207,18 +212,18 @@ static const struct pios_flash_partition pios_flash_partition_table[] = {
 		.label        = FLASH_PARTITION_LABEL_WAYPOINTS,
 		.chip_desc    = &pios_flash_chip_external,
 		.first_sector = 16,
-		.last_sector  = 31,
+		.last_sector  = 17,
 		.chip_offset  = (16 * FLASH_SECTOR_4KB),
-		.size         = (31 - 16 + 1) * FLASH_SECTOR_4KB,
+		.size         = 2 * FLASH_SECTOR_64KB,
 	},
 
 	{
 		.label        = FLASH_PARTITION_LABEL_LOG,
 		.chip_desc    = &pios_flash_chip_external,
-		.first_sector = 32,
-		.last_sector  = 2047,
-		.chip_offset  = (32 * FLASH_SECTOR_4KB),
-		.size         = (2047 - 32 + 1) * FLASH_SECTOR_4KB,
+		.first_sector = 18,
+		.last_sector  = 270,
+		.chip_offset  = (16 * FLASH_SECTOR_4KB) + (2 * FLASH_SECTOR_64KB),
+		.size         = (270 - 18 + 1) * FLASH_SECTOR_64KB,
 	},
 #endif	/* PIOS_INCLUDE_FLASH_JEDEC */
 };
