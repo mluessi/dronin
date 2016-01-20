@@ -509,6 +509,12 @@ void PIOS_Board_Init(void) {
 
 	PIOS_SENSORS_Init();
 
+#if defined(PIOS_INCLUDE_ADC)
+	uint32_t internal_adc_id;
+	PIOS_INTERNAL_ADC_Init(&internal_adc_id, &pios_adc_cfg);
+	PIOS_ADC_Init(&pios_internal_adc_id, &pios_internal_adc_driver, internal_adc_id);
+#endif /* defined(PIOS_INCLUDE_ADC) */
+
 #if defined(PIOS_INCLUDE_SPI)
 #if defined(PIOS_INCLUDE_BMI160)
 	if(PIOS_BMI160_Init(pios_spi_gyro_id, 0, &pios_bmi160_cfg) != 0){
