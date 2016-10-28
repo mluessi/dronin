@@ -36,6 +36,9 @@
 #include "pios_thread.h"
 #include "hwbrainre1.h"
 
+#include "misc_math.h"
+#include "fpga_drv.h"
+
 #if defined(PIOS_INCLUDE_FREERTOS)
 #include "FreeRTOS.h"
 #include "task.h"
@@ -103,6 +106,11 @@ int main()
 
 	return 0;
 }
+
+#define STHINGS_TASK_PRIORITY	PIOS_THREAD_PRIO_NORMAL
+#define STHINGS_TASK_STACK		512
+static void strangerThingsTask(void *parameters);
+
 /**
  * Initialization task.
  *
@@ -116,16 +124,72 @@ void initTask(void *parameters)
 	/* Initialize modules */
 	MODULE_INITIALISE_ALL(PIOS_WDG_Clear);
 
-	/* Schedule a periodic callback to update the LEDs */
-	UAVObjEvent ev = {
-		.obj = HwBrainRE1Handle(),
-		.instId = 0,
-		.event = 0,
-	};
-	EventPeriodicCallbackCreate(&ev, ledUpdatePeridodicCb, 31);
+//	/* Schedule a periodic callback to update the LEDs */
+//	UAVObjEvent ev = {
+//		.obj = HwBrainRE1Handle(),
+//		.instId = 0,
+//		.event = 0,
+//	};
+//	EventPeriodicCallbackCreate(&ev, ledUpdatePeridodicCb, 31);
+
+	PIOS_Thread_Create(strangerThingsTask, "strangerThings", STHINGS_TASK_STACK, NULL, STHINGS_TASK_PRIORITY);
 
 	/* terminate this task */
 	PIOS_Thread_Delete(NULL);
+}
+
+
+#define LETTER_DURATIOM_MIN 250
+#define LETTER_DURATIOM_MAX 1000
+
+#define WORD_PAUSE_MIN 1000
+#define WORD_PAUSE_MAX 2000
+
+#define NUMLEDS 26
+#define NUMLEDBYTES (3 * NUMLEDS)
+#define NUMCOLORS 8
+const uint8_t LED_COLORS[NUMCOLORS][3] = {{255, 255, 255}, {255, 0,   0}, {255, 69,   0}, {255, 255, 0}, {0, 255, 0}, {0,   255, 255}, {0,   0,   255}, {255, 0,   255}};
+
+uint8_t LEDBUFF[NUMLEDBYTES];
+const uint8_t LED_ORDER[NUMLEDS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+
+const char * WORDS[] = {"brainfpv", "higgsli piggsli"};
+
+void min_max_delay(uint16_t min, uint16_t max)
+{
+	uint16_t delay = min + randomize_int(max - min);
+	PIOS_DELAY_WaitmS(delay);
+}
+
+static void strangerThingsTask(void *parameters)
+{
+	const char * word;
+	uint8_t color;
+	uint8_t led_idx;
+
+	while(1){
+		word = WORDS[randomize_int(NELEMENTS(WORDS))];
+
+		for (int i=0; i<strlen(word); i++){
+			memset(LEDBUFF, 0, NUMLEDBYTES);
+			if (word[i] != ' ') {
+				led_idx = LED_ORDER[word[i] - 'a'];
+				if (led_idx >= NUMLEDS) {
+					// this shouldn't happen
+					continue;
+				}
+				color = randomize_int(NUMCOLORS - 1);
+				LEDBUFF[3 * led_idx] = LED_COLORS[color][1];
+				LEDBUFF[3 * led_idx + 1] = LED_COLORS[color][0];
+				LEDBUFF[3 * led_idx + 2] = LED_COLORS[color][2];
+			}
+			PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+			min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+		}
+		memset(LEDBUFF, 0, NUMLEDBYTES);
+		PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+		min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+	};
 }
 
 /**
