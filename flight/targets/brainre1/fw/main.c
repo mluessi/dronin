@@ -139,21 +139,29 @@ void initTask(void *parameters)
 }
 
 
-#define LETTER_DURATIOM_MIN 250
+#define LETTER_DURATIOM_MIN 500
 #define LETTER_DURATIOM_MAX 1000
 
-#define WORD_PAUSE_MIN 1000
-#define WORD_PAUSE_MAX 2000
+#define WORD_PAUSE_MIN 2000
+#define WORD_PAUSE_MAX 5000
 
 #define NUMLEDS 26
 #define NUMLEDBYTES (3 * NUMLEDS)
 #define NUMCOLORS 8
-const uint8_t LED_COLORS[NUMCOLORS][3] = {{255, 255, 255}, {255, 0,   0}, {255, 69,   0}, {255, 255, 0}, {0, 255, 0}, {0,   255, 255}, {0,   0,   255}, {255, 0,   255}};
+const uint8_t COLORS[NUMCOLORS][3] = {{255, 255, 255}, {255, 0,   0}, {255, 69,   0}, {255, 255, 0}, {0, 255, 0}, {0,   255, 255}, {0,   0,   255}, {255, 0,   255}};
+
+uint8_t colors[NUMLEDS];
+
 
 uint8_t LEDBUFF[NUMLEDBYTES];
-const uint8_t LED_ORDER[NUMLEDS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+const uint8_t LED_ORDER[NUMLEDS] = { 17, 18, 19, 20, 21, 22, 23, 24, 25,
+									 16, 15, 14, 13, 12, 11, 10,  9,  8,
+									  0,  1,  2,  3,  4,  5,  6,  7};
 
-const char * WORDS[] = {"brainfpv", "higgsli piggsli"};
+//const char * WORDS[] = {"brainfpv"};
+//const char * WORDS[] = {"nasty woman", "pussy", "biggly", "barb", "eleven", "higgs", "cunt", "eat shit", "mabel", "log lady", "beer me"};
+const char * WORDS[] = {"nasty woman", "biggly", "barb", "higgs", "crossvalidation", "p value", "grant", "brainz", "mit", "amygdala", "gablab", "mri", "python", "nipype"};
+
 
 void min_max_delay(uint16_t min, uint16_t max)
 {
@@ -161,34 +169,77 @@ void min_max_delay(uint16_t min, uint16_t max)
 	PIOS_DELAY_WaitmS(delay);
 }
 
+void flicker_led(uint8_t led_idx, uint8_t duration)
+{
+	uint32_t end_time = PIOS_Thread_Systime() + duration;
+
+	while (PIOS_Thread_Systime() < end_time) {
+		memset(LEDBUFF, 0, NUMLEDBYTES);
+		if (randomize_int(256) < 128) {
+			LEDBUFF[3 * led_idx] = COLORS[colors[led_idx]][1];
+			LEDBUFF[3 * led_idx + 1] = COLORS[colors[led_idx]][0];
+			LEDBUFF[3 * led_idx + 2] = COLORS[colors[led_idx]][2];
+		}
+		PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+		min_max_delay(duration / 20, duration / 3);
+	}
+}
+
+void random_flicker(uint16_t duration)
+{
+	uint32_t end_time = PIOS_Thread_Systime() + duration;
+	uint8_t led_idx;
+
+	while (PIOS_Thread_Systime() < end_time) {
+		if (randomize_int(255) < 30) {
+			memset(LEDBUFF, 0, NUMLEDBYTES);
+		}
+		led_idx = randomize_int(NUMLEDS -1);
+		flicker_led(led_idx,  randomize_int(100));
+	}
+}
+
+
 static void strangerThingsTask(void *parameters)
 {
 	const char * word;
-	uint8_t color;
 	uint8_t led_idx;
+
+	for (int i=0; i<NUMLEDS; i++) {
+		colors[i] = randomize_int(NUMCOLORS - 1);
+	}
 
 	while(1){
 		word = WORDS[randomize_int(NELEMENTS(WORDS))];
 
 		for (int i=0; i<strlen(word); i++){
-			memset(LEDBUFF, 0, NUMLEDBYTES);
 			if (word[i] != ' ') {
 				led_idx = LED_ORDER[word[i] - 'a'];
 				if (led_idx >= NUMLEDS) {
 					// this shouldn't happen
 					continue;
 				}
-				color = randomize_int(NUMCOLORS - 1);
-				LEDBUFF[3 * led_idx] = LED_COLORS[color][1];
-				LEDBUFF[3 * led_idx + 1] = LED_COLORS[color][0];
-				LEDBUFF[3 * led_idx + 2] = LED_COLORS[color][2];
+				//flicker_led(led_idx, LETTER_DURATIOM_MIN + randomize_int(LETTER_DURATIOM_MAX - LETTER_DURATIOM_MIN));
+				memset(LEDBUFF, 0, NUMLEDBYTES);
+				LEDBUFF[3 * led_idx] = COLORS[colors[led_idx]][1];
+				LEDBUFF[3 * led_idx + 1] = COLORS[colors[led_idx]][0];
+				LEDBUFF[3 * led_idx + 2] = COLORS[colors[led_idx]][2];
+				PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+				min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
 			}
-			PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
-			min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+			else {
+				memset(LEDBUFF, 0, NUMLEDBYTES);
+				PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+				min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+			}
 		}
+		//memset(LEDBUFF, 0, NUMLEDBYTES);
+		//PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
+		//min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+		random_flicker(WORD_PAUSE_MIN + randomize_int(WORD_PAUSE_MAX - WORD_PAUSE_MIN));
 		memset(LEDBUFF, 0, NUMLEDBYTES);
 		PIOS_RE1FPGA_SetLEDs(LEDBUFF, NUMLEDS);
-		min_max_delay(LETTER_DURATIOM_MIN, LETTER_DURATIOM_MAX);
+		min_max_delay(WORD_PAUSE_MIN, WORD_PAUSE_MAX);
 	};
 }
 
